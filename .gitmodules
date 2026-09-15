@@ -3,7 +3,12 @@
 	url = https://github.com/instinctual/plank-host-linux.git
 [submodule "client/moonlight-qt-fork"]
 	path = apps/client
-	url = https://github.com/instinctual/plank-client.git
+	url = https://github.com/skulleyfx/plank-client.git
+	branch = windows
 [submodule "third_party/kyber-kymux"]
 	path = third_party/kyber-kymux
 	url = https://github.com/instinctual/plank-kymux.git
+[submodule "host/windows"]
+	path = apps/host/windows
+	url = https://github.com/skulleyfx/plank-host-windows.git
+	branch = main
