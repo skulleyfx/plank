@@ -27,6 +27,16 @@ if ($upstreamVersion -notmatch '^\d+\.\d+\.\d+$') { throw "packaging/VERSION is 
 $version = "$upstreamVersion.$Revision"
 New-Item -ItemType Directory -Force $OutputDirectory | Out-Null
 
+# Use extensions next to wix.exe when present, so every account can build;
+# otherwise fall back to the per-user WiX extension cache.
+$extensionRoot = Join-Path (Split-Path (Split-Path $Wix)) 'wix-extensions'
+function Get-WixExtension([string] $Name) {
+  $dll = Get-ChildItem $extensionRoot -Recurse -Filter "$Name.dll" -ErrorAction SilentlyContinue |
+    Select-Object -First 1
+  if ($dll) { return $dll.FullName }
+  return $Name
+}
+
 function Invoke-Wix([string[]] $Arguments) {
   & $Wix @Arguments
   if ($LASTEXITCODE -ne 0) { throw "wix build failed ($LASTEXITCODE)" }
@@ -39,7 +49,8 @@ if ($HostPayload) {
   $hostMsi = Join-Path $OutputDirectory "plank-host-$version.msi"
   Invoke-Wix @('build', (Join-Path $repository 'packaging\host\windows\plank-host.wxs'),
     '-arch', 'x64', '-d', "Version=$version",
-    '-ext', 'WixToolset.Util.wixext', '-ext', 'WixToolset.Firewall.wixext',
+    '-ext', (Get-WixExtension 'WixToolset.Util.wixext'),
+    '-ext', (Get-WixExtension 'WixToolset.Firewall.wixext'),
     '-bindpath', "payload=$HostPayload",
     '-bindpath', "setup=$(Join-Path $repository 'packaging\host\windows')",
     '-o', $hostMsi)
