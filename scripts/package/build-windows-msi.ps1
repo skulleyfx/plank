@@ -53,6 +53,7 @@ if ($ClientPayload) {
   Invoke-Wix @('build', (Join-Path $repository 'packaging\client\windows\plank-client.wxs'),
     '-arch', 'x64', '-d', "Version=$version",
     '-bindpath', "client=$ClientPayload",
+    '-bindpath', (Join-Path $repository 'packaging\client\windows'),
     '-o', $clientMsi)
   Remove-Item ([IO.Path]::ChangeExtension($clientMsi, '.wixpdb')) -ErrorAction SilentlyContinue
   "built $clientMsi"

@@ -22,8 +22,9 @@
 
     <Property Id="ARPNOMODIFY" Value="1" />
     <Property Id="ARPURLINFOABOUT" Value="https://github.com/skulleyfx/plank-client" />
-    <Icon Id="PlankClientIcon" SourceFile="!(bindpath.client)plank-client.exe" />
-    <Property Id="ARPPRODUCTICON" Value="PlankClientIcon" />
+    <!-- An Icon Id needs the source file's extension, or shortcuts show a blank icon. -->
+    <Icon Id="plankclient.ico" SourceFile="plank-client.ico" />
+    <Property Id="ARPPRODUCTICON" Value="plankclient.ico" />
 
     <Launch Condition="VersionNT64" Message="PLANK Client requires 64-bit Windows." />
 
@@ -39,7 +40,7 @@
                     Name="PLANK"
                     Description="Connect to a PLANK workstation"
                     WorkingDirectory="INSTALLFOLDER"
-                    Icon="PlankClientIcon"
+                    Icon="plankclient.ico"
                     Advertise="yes" />
         </File>
       </Component>
