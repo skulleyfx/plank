@@ -1,0 +1,103 @@
+<!--
+  PLANK Host for Windows.
+
+  Build with scripts/package/build-windows-msi.ps1. Silent install:
+    msiexec /i plank-host-<version>.msi /qn
+      DUO_INTEGRATION_KEY=... DUO_SECRET_KEY=... DUO_API_HOST=... DEFAULT_DOMAIN=...
+
+  %ProgramData%\PLANK (certificate, host ID, host.conf, logs) is created by
+  plank-host-setup.ps1 and is not removed on uninstall, so a reinstall keeps
+  the host paired with its clients.
+-->
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs"
+     xmlns:fw="http://wixtoolset.org/schemas/v4/wxs/firewall"
+     xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util">
+  <Package Name="PLANK Host"
+           Manufacturer="SkulleyFX"
+           Version="$(var.Version)"
+           UpgradeCode="A1DE2B25-B311-462F-A05E-000F42A688E0"
+           Scope="perMachine"
+           Compressed="yes"
+           InstallerVersion="500">
+    <SummaryInformation Description="PLANK Host $(var.Version)" />
+    <MajorUpgrade AllowSameVersionUpgrades="yes"
+                  DowngradeErrorMessage="A newer version of PLANK Host is already installed." />
+    <MediaTemplate EmbedCab="yes" CompressionLevel="high" />
+
+    <Property Id="ARPNOMODIFY" Value="1" />
+    <Property Id="ARPURLINFOABOUT" Value="https://github.com/skulleyfx/plank-host-windows" />
+
+    <!-- Optional deployment settings; see plank-host-setup.ps1. -->
+    <Property Id="DUO_INTEGRATION_KEY" Secure="yes" Hidden="yes" />
+    <Property Id="DUO_SECRET_KEY" Secure="yes" Hidden="yes" />
+    <Property Id="DUO_API_HOST" Secure="yes" />
+    <Property Id="DEFAULT_DOMAIN" Secure="yes" />
+    <Property Id="HOST_DNS_NAME" Secure="yes" />
+
+    <Launch Condition="VersionNT64" Message="PLANK Host requires 64-bit Windows." />
+    <Launch Condition="Privileged" Message="PLANK Host must be installed by an administrator." />
+
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="PLANK Host">
+        <Directory Id="ToolsFolder" Name="tools" />
+      </Directory>
+    </StandardDirectory>
+
+    <Feature Id="Host" Title="PLANK Host" AllowAbsent="no">
+      <Component Directory="INSTALLFOLDER">
+        <File Id="SunshineExe" Source="!(bindpath.payload)sunshine.exe" KeyPath="yes">
+          <fw:FirewallException Id="PlankHostTcp"
+                                Name="PLANK Host (TCP 28989)"
+                                Description="PLANK Host connections"
+                                Port="28989" Protocol="tcp" Scope="any" Profile="all" />
+          <fw:FirewallException Id="PlankHostUdp"
+                                Name="PLANK Host (UDP 28989)"
+                                Description="PLANK Host streams"
+                                Port="28989" Protocol="udp" Scope="any" Profile="all" />
+        </File>
+      </Component>
+
+      <Component Directory="ToolsFolder">
+        <File Id="ServiceExe" Source="!(bindpath.payload)tools\sunshinesvc.exe" KeyPath="yes" />
+        <!-- The service name is fixed in tools/sunshinesvc.cpp. -->
+        <ServiceInstall Name="SunshineService"
+                        DisplayName="PLANK Host"
+                        Description="Streams this workstation's console to PLANK clients."
+                        Type="ownProcess" Start="auto" ErrorControl="normal"
+                        Account="LocalSystem" Vital="yes" />
+        <ServiceControl Id="PlankHostService" Name="SunshineService"
+                        Start="install" Stop="both" Remove="uninstall" Wait="yes" />
+      </Component>
+
+      <Component Directory="ToolsFolder">
+        <File Id="SetupScript" Source="!(bindpath.setup)plank-host-setup.ps1" KeyPath="yes" />
+      </Component>
+
+      <Files Directory="ToolsFolder" Include="!(bindpath.payload)tools\*.exe">
+        <Exclude Files="!(bindpath.payload)tools\sunshinesvc.exe" />
+      </Files>
+      <Files Directory="INSTALLFOLDER" Subdirectory="assets" Include="!(bindpath.payload)assets\**" />
+    </Feature>
+
+    <!--
+      Prepare %ProgramData%\PLANK after files are installed and before the
+      service starts, so the host never creates its own non-PLANK certificate.
+    -->
+    <SetProperty Id="PlankHostSetup"
+                 Sequence="execute"
+                 Before="PlankHostSetup"
+                 Condition="NOT (REMOVE~=&quot;ALL&quot;)"
+                 Value="&quot;[System64Folder]WindowsPowerShell\v1.0\powershell.exe&quot; -NoProfile -NonInteractive -ExecutionPolicy Bypass -File &quot;[ToolsFolder]plank-host-setup.ps1&quot; -DnsName &quot;[HOST_DNS_NAME]&quot; -DefaultDomain &quot;[DEFAULT_DOMAIN]&quot; -DuoApiHost &quot;[DUO_API_HOST]&quot; -DuoIntegrationKey &quot;[DUO_INTEGRATION_KEY]&quot; -DuoSecretKey &quot;[DUO_SECRET_KEY]&quot;" />
+    <CustomAction Id="PlankHostSetup"
+                  BinaryRef="Wix4UtilCA_X64"
+                  DllEntry="WixQuietExec"
+                  Execute="deferred"
+                  Impersonate="no"
+                  Return="check"
+                  HideTarget="yes" />
+    <InstallExecuteSequence>
+      <Custom Action="PlankHostSetup" Before="StartServices"
+              Condition="NOT (REMOVE~=&quot;ALL&quot;)" />
+    </InstallExecuteSequence>
+  </Package>
+</Wix>

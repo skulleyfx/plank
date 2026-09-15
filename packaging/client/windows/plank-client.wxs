@@ -1,0 +1,51 @@
+<!--
+  PLANK Client for Windows.
+
+  Build with scripts/package/build-windows-msi.ps1. Silent install:
+    msiexec /i plank-client-<version>.msi /qn
+
+  Per-user settings (saved hosts, usernames) live in each user's registry and
+  are kept on upgrade and uninstall.
+-->
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Package Name="PLANK Client"
+           Manufacturer="SkulleyFX"
+           Version="$(var.Version)"
+           UpgradeCode="D61609CA-FFF5-4B97-96D3-03416A701ACF"
+           Scope="perMachine"
+           Compressed="yes"
+           InstallerVersion="500">
+    <SummaryInformation Description="PLANK Client $(var.Version)" />
+    <MajorUpgrade AllowSameVersionUpgrades="yes"
+                  DowngradeErrorMessage="A newer version of PLANK Client is already installed." />
+    <MediaTemplate EmbedCab="yes" CompressionLevel="high" />
+
+    <Property Id="ARPNOMODIFY" Value="1" />
+    <Property Id="ARPURLINFOABOUT" Value="https://github.com/skulleyfx/plank-client" />
+    <Icon Id="PlankClientIcon" SourceFile="!(bindpath.client)plank-client.exe" />
+    <Property Id="ARPPRODUCTICON" Value="PlankClientIcon" />
+
+    <Launch Condition="VersionNT64" Message="PLANK Client requires 64-bit Windows." />
+
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Id="INSTALLFOLDER" Name="PLANK Client" />
+    </StandardDirectory>
+
+    <Feature Id="Client" Title="PLANK Client" AllowAbsent="no">
+      <Component Directory="INSTALLFOLDER">
+        <File Id="ClientExe" Source="!(bindpath.client)plank-client.exe" KeyPath="yes">
+          <Shortcut Id="ClientStartMenu"
+                    Directory="ProgramMenuFolder"
+                    Name="PLANK"
+                    Description="Connect to a PLANK workstation"
+                    WorkingDirectory="INSTALLFOLDER"
+                    Icon="PlankClientIcon"
+                    Advertise="yes" />
+        </File>
+      </Component>
+      <Files Directory="INSTALLFOLDER" Include="!(bindpath.client)**">
+        <Exclude Files="!(bindpath.client)plank-client.exe" />
+      </Files>
+    </Feature>
+  </Package>
+</Wix>
