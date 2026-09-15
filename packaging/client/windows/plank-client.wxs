@@ -34,15 +34,21 @@
 
     <Feature Id="Client" Title="PLANK Client" AllowAbsent="no">
       <Component Directory="INSTALLFOLDER">
-        <File Id="ClientExe" Name="plank-client.exe" Source="!(bindpath.client)plank-client.exe" KeyPath="yes">
-          <Shortcut Id="ClientStartMenu"
-                    Directory="ProgramMenuFolder"
-                    Name="PLANK"
-                    Description="Connect to a PLANK workstation"
-                    WorkingDirectory="INSTALLFOLDER"
-                    Icon="plankclient.ico"
-                    Advertise="yes" />
-        </File>
+        <File Id="ClientExe" Name="plank-client.exe" Source="!(bindpath.client)plank-client.exe" KeyPath="yes" />
+      </Component>
+      <!--
+        A plain shortcut to the executable, which carries the PLANK icon.
+        Advertised shortcuts point at a cached icon file instead, and
+        Windows 10 showed them blank.
+      -->
+      <Component Directory="ProgramMenuFolder">
+        <Shortcut Id="ClientStartMenu"
+                  Name="PLANK"
+                  Description="Connect to a PLANK workstation"
+                  Target="[#ClientExe]"
+                  WorkingDirectory="INSTALLFOLDER" />
+        <RegistryValue Root="HKLM" Key="Software\SkulleyFX\PLANK Client" Name="StartMenuShortcut"
+                       Type="integer" Value="1" KeyPath="yes" />
       </Component>
       <Files Directory="INSTALLFOLDER" Include="!(bindpath.client)**">
         <Exclude Files="!(bindpath.client)plank-client.exe" />
