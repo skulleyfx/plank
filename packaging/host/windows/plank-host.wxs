@@ -43,9 +43,10 @@
       </Directory>
     </StandardDirectory>
 
+    <!-- Explicit File/@Name: WiX otherwise names a file after its whole Source, bind variable included. -->
     <Feature Id="Host" Title="PLANK Host" AllowAbsent="no">
       <Component Directory="INSTALLFOLDER">
-        <File Id="SunshineExe" Source="!(bindpath.payload)sunshine.exe" KeyPath="yes">
+        <File Id="SunshineExe" Name="sunshine.exe" Source="!(bindpath.payload)sunshine.exe" KeyPath="yes">
           <fw:FirewallException Id="PlankHostTcp"
                                 Name="PLANK Host (TCP 28989)"
                                 Description="PLANK Host connections"
@@ -58,7 +59,7 @@
       </Component>
 
       <Component Directory="ToolsFolder">
-        <File Id="ServiceExe" Source="!(bindpath.payload)tools\sunshinesvc.exe" KeyPath="yes" />
+        <File Id="ServiceExe" Name="sunshinesvc.exe" Source="!(bindpath.payload)tools\sunshinesvc.exe" KeyPath="yes" />
         <!-- The service name is fixed in tools/sunshinesvc.cpp. -->
         <ServiceInstall Name="SunshineService"
                         DisplayName="PLANK Host"
@@ -70,7 +71,7 @@
       </Component>
 
       <Component Directory="ToolsFolder">
-        <File Id="SetupScript" Source="!(bindpath.setup)plank-host-setup.ps1" KeyPath="yes" />
+        <File Id="SetupScript" Name="plank-host-setup.ps1" Source="!(bindpath.setup)plank-host-setup.ps1" KeyPath="yes" />
       </Component>
 
       <Files Directory="ToolsFolder" Include="!(bindpath.payload)tools\*.exe">

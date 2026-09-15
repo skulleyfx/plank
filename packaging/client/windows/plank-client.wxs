@@ -34,7 +34,7 @@
 
     <Feature Id="Client" Title="PLANK Client" AllowAbsent="no">
       <Component Directory="INSTALLFOLDER">
-        <File Id="ClientExe" Source="!(bindpath.client)plank-client.exe" KeyPath="yes">
+        <File Id="ClientExe" Name="plank-client.exe" Source="!(bindpath.client)plank-client.exe" KeyPath="yes">
           <Shortcut Id="ClientStartMenu"
                     Directory="ProgramMenuFolder"
                     Name="PLANK"
