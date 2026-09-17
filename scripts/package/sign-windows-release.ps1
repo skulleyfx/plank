@@ -24,7 +24,11 @@ param(
   [string] $OutputDirectory = 'C:\plank-build\msi',
   [string] $Wix = 'C:\plank-build\tools\wix\wix.exe',
   [string] $TimestampUrl = 'http://timestamp.digicert.com',
-  [string] $Thumbprint = ''
+  [string] $Thumbprint = '',
+  # Ship a client without rebuilding the host: the host keeps the revision it
+  # was built with, so no host MSI is produced with a version its binary does
+  # not carry.
+  [switch] $ClientOnly
 )
 
 $ErrorActionPreference = 'Stop'
@@ -58,11 +62,12 @@ function Invoke-Sign([string[]] $Files) {
   if ($LASTEXITCODE -ne 0) { throw "signtool verify failed ($LASTEXITCODE)" }
 }
 
-$programs = @(
-  (Join-Path $ClientPayload 'plank-client.exe'),
-  (Join-Path $HostPayload 'sunshine.exe'),
-  (Join-Path $HostPayload 'tools\sunshinesvc.exe')
-)
+if ($ClientOnly) { $HostPayload = '' }
+$programs = @((Join-Path $ClientPayload 'plank-client.exe'))
+if ($HostPayload) {
+  $programs += (Join-Path $HostPayload 'sunshine.exe')
+  $programs += (Join-Path $HostPayload 'tools\sunshinesvc.exe')
+}
 Write-Output '== Signing programs'
 Invoke-Sign $programs
 
@@ -78,10 +83,10 @@ $build = Join-Path $PSScriptRoot 'build-windows-msi.ps1'
   -Revision $Revision -OutputDirectory $OutputDirectory -Wix $Wix
 
 $version = (Get-Content (Join-Path $PSScriptRoot '..\..\packaging\VERSION') -Raw).Trim()
-$msis = @(
-  (Join-Path $OutputDirectory "plank-host-$version.$Revision.msi"),
-  (Join-Path $OutputDirectory "plank-client-$version.$Revision.msi")
-)
+$msis = @((Join-Path $OutputDirectory "plank-client-$version.$Revision.msi"))
+if ($HostPayload) {
+  $msis = @((Join-Path $OutputDirectory "plank-host-$version.$Revision.msi")) + $msis
+}
 Write-Output '== Signing MSIs'
 Invoke-Sign $msis
 
