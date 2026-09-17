@@ -28,7 +28,9 @@ param(
   # Ship a client without rebuilding the host: the host keeps the revision it
   # was built with, so no host MSI is produced with a version its binary does
   # not carry.
-  [switch] $ClientOnly
+  [switch] $ClientOnly,
+  # The mirror of -ClientOnly: ship a host fix without reissuing the client.
+  [switch] $HostOnly
 )
 
 $ErrorActionPreference = 'Stop'
@@ -62,8 +64,13 @@ function Invoke-Sign([string[]] $Files) {
   if ($LASTEXITCODE -ne 0) { throw "signtool verify failed ($LASTEXITCODE)" }
 }
 
+if ($ClientOnly -and $HostOnly) { throw 'Pass one of -ClientOnly or -HostOnly, not both' }
 if ($ClientOnly) { $HostPayload = '' }
-$programs = @((Join-Path $ClientPayload 'plank-client.exe'))
+if ($HostOnly) { $ClientPayload = '' }
+$programs = @()
+if ($ClientPayload) {
+  $programs += (Join-Path $ClientPayload 'plank-client.exe')
+}
 if ($HostPayload) {
   $programs += (Join-Path $HostPayload 'sunshine.exe')
   $programs += (Join-Path $HostPayload 'tools\sunshinesvc.exe')
@@ -83,7 +90,10 @@ $build = Join-Path $PSScriptRoot 'build-windows-msi.ps1'
   -Revision $Revision -OutputDirectory $OutputDirectory -Wix $Wix
 
 $version = (Get-Content (Join-Path $PSScriptRoot '..\..\packaging\VERSION') -Raw).Trim()
-$msis = @((Join-Path $OutputDirectory "plank-client-$version.$Revision.msi"))
+$msis = @()
+if ($ClientPayload) {
+  $msis += (Join-Path $OutputDirectory "plank-client-$version.$Revision.msi")
+}
 if ($HostPayload) {
   $msis = @((Join-Path $OutputDirectory "plank-host-$version.$Revision.msi")) + $msis
 }
