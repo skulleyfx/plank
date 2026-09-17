@@ -20,8 +20,8 @@ $Key = 'ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIBCC/LfMpdTKVqb94qRRGFh7vw5hAn3MuEfg
 
 # The key is the one line here that cannot be short. A truncated paste would
 # otherwise be discovered later as an authentication failure with no cause.
-if ($Key.Length -ne 101 -or -not $Key.EndsWith('plank-windows-build')) {
-  throw "The key line was cut while pasting ($($Key.Length) of 101 characters). Paste the script again."
+if ($Key.Length -ne 100 -or -not $Key.EndsWith('plank-windows-build')) {
+  throw "The key line was cut while pasting ($($Key.Length) of 100 characters). Paste the script again."
 }
 
 $cap = Get-WindowsCapability -Online -Name 'OpenSSH.Server*'
