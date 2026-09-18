@@ -75,6 +75,21 @@ if ($HostPayload) {
   $programs += (Join-Path $HostPayload 'sunshine.exe')
   $programs += (Join-Path $HostPayload 'tools\sunshinesvc.exe')
 }
+# A payload left over from an earlier build carries an earlier version, and
+# signing it produces an installer whose number its program does not have.
+# Both numbers are known here, so refuse rather than ship the confusion.
+$upstream = (Get-Content (Join-Path $PSScriptRoot '..\..\packaging\VERSION') -Raw).Trim()
+foreach ($program in $programs) {
+  if (-not (Test-Path $program)) { throw "Payload is missing $program" }
+  $built = (Get-Item $program).VersionInfo.FileVersion
+  # sunshinesvc.exe carries no version resource of its own.
+  if ([string]::IsNullOrWhiteSpace($built)) { continue }
+  if ($built -ne "$upstream.$Revision") {
+    throw ("$(Split-Path $program -Leaf) is version $built, not $upstream.$Revision. " +
+           'Stage the payload from the build you mean to sign.')
+  }
+}
+
 Write-Output '== Signing programs'
 Invoke-Sign $programs
 
