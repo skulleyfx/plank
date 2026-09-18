@@ -32,6 +32,19 @@ if ($cap.State -ne 'Installed') {
   Write-Output 'OpenSSH Server already installed.'
 }
 
+# Installing the capability returns before Windows registers the service, so
+# on a slower machine the next line failed on a service that did not exist
+# yet. Wait for it rather than assume.
+$deadline = (Get-Date).AddSeconds(120)
+while (-not (Get-Service sshd -EA SilentlyContinue) -and
+       (Get-Date) -lt $deadline) {
+  Start-Sleep -Seconds 5
+}
+if (-not (Get-Service sshd -EA SilentlyContinue)) {
+  throw ('OpenSSH installed but the sshd service has not appeared. ' +
+         'This machine needs a reboot; run this again afterwards.')
+}
+
 Set-Service -Name sshd -StartupType Automatic
 Start-Service sshd
 Write-Output ('sshd: ' + (Get-Service sshd).Status)
