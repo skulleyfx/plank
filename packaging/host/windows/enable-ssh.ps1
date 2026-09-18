@@ -27,7 +27,23 @@ if ($Key.Length -ne 100 -or -not $Key.EndsWith('plank-windows-build')) {
 $cap = Get-WindowsCapability -Online -Name 'OpenSSH.Server*'
 if ($cap.State -ne 'Installed') {
   Write-Output 'Installing OpenSSH Server...'
-  Add-WindowsCapability -Online -Name $cap.Name | Out-Null
+  try {
+    Add-WindowsCapability -Online -Name $cap.Name -EA Stop | Out-Null
+  } catch {
+    # A machine managed by WSUS has no source for optional features until
+    # repair content is allowed to come from Windows Update directly. That
+    # is the 0x80240023 refusal, and it stops the install before it starts.
+    Write-Output 'Windows refused the feature source; allowing Windows Update.'
+    $wu = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\WindowsUpdate'
+    New-Item -Path $wu -Force | Out-Null
+    Set-ItemProperty -Path $wu -Name RepairContentServerSource `
+      -Type DWord -Value 2
+    Set-ItemProperty -Path $wu -Name SetPolicyDrivenUpdateSourceForOtherUpdates `
+      -Type DWord -Value 0 -EA SilentlyContinue
+    Restart-Service wuauserv -Force -EA SilentlyContinue
+    Start-Sleep -Seconds 5
+    Add-WindowsCapability -Online -Name $cap.Name | Out-Null
+  }
 } else {
   Write-Output 'OpenSSH Server already installed.'
 }
