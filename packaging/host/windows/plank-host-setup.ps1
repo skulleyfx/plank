@@ -212,9 +212,11 @@ port = 28989
 startup_layout = physical
 
 [security]
-# DUO push after the Windows password. With second_factor = duo and no DUO
-# keys set, every sign-in is refused.
-second_factor = duo
+# A fresh host signs in with the Windows password alone. Running DUO-AUTH with
+# real keys switches this to "duo", which adds the DUO push. Left at "none" a
+# host is reachable with the Windows password only, so configure DUO before a
+# host is exposed beyond the office allow-list.
+second_factor = none
 second_factor_failmode = deny
 allow_root_login = false
 # Lock the workstation this many seconds after the last stream ends.
@@ -242,6 +244,11 @@ if ($DefaultDomain) { $lines = Set-ConfigValue $lines 'default_domain' $DefaultD
 if ($DuoApiHost) { $lines = Set-ConfigValue $lines 'duo_api_host' $DuoApiHost; $changed += 'duo_api_host' }
 if ($DuoIntegrationKey) { $lines = Set-ConfigValue $lines 'duo_integration_key' $DuoIntegrationKey; $changed += 'duo_integration_key' }
 if ($DuoSecretKey) { $lines = Set-ConfigValue $lines 'duo_secret_key' $DuoSecretKey; $changed += 'duo_secret_key' }
+# Turn the DUO push on precisely when real keys are supplied, so DUO-AUTH
+# enables it and a plain install stays password-only.
+if ($DuoIntegrationKey -and $DuoSecretKey -and $DuoApiHost) {
+  $lines = Set-ConfigValue $lines 'second_factor' 'duo'; $changed += 'second_factor=duo'
+}
 if ($changed.Count -gt 0) {
   $lines | Set-Content -Path $configPath -Encoding Ascii
   Write-Step "host_config_updated=$($changed -join ',')"
