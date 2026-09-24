@@ -189,12 +189,37 @@ Four portable root CTest entries pass, including 20 privacy guard cases.
 | --- | --- |
 | Linux Host | `9329784ac41f50cbec0c9d76badfd22227ec5e5f` |
 | Shared Client | `c032da3ae0d7e816a7a6f9bb9a51dd489d4d369c` |
+| Windows Host 1.0.103.39 | `ac6444de094ce1d7d27f90cc647995ac8bdab603` |
+| Windows Client 1.0.103.39 (`windows`) | `467c4c19b2e6fb2ca4bb4fd2b4ca252ad0ff61ad` |
 | Transport | `912ece5c64787997f978673ca60d313898a3548c` |
 | Host common-C | `775943b5ac5e5100a3c2b1b89d9e21151dea4f29` |
 | Client common-C | `b9650552f98d97f6e30c9f007115c6246f0809e5` |
 | Client mDNS engine | `b7a5a9f225d5e14b39f9fd1f905c4f505cf2ee99` |
 | Host build dependencies | `caf0495d5e6baff94f349853d4a59e3779a451a0` |
 | Host virtual HID | `93d57db99a5bf4b1a9fbbc7ad1371671725b7e97` |
+
+## Windows 1.0.103.39 checkpoint
+
+The Windows Host now advertises capture-source availability at runtime. The Windows
+Client offers Automatic, explicit DXGI Desktop Duplication and explicit Windows
+Graphics Capture only when the selected Host advertises them. Automatic tries DXGI
+first and WGC second. Explicit DXGI does not fall back, and WGC refuses a spanned
+multi-monitor request.
+
+The signed Host and Client MSI hashes, sizes and exact source commits are recorded in
+`docs/releases/1.0.103.39.md`. Machine-specific installation records remain in the
+private deployment system.
+
+Interactive Windows testing before this checkpoint established working dual-display
+streaming and real pen events with pressure and tilt when Windows Ink was enabled in
+the tablet driver. A higher-latency WAN test established a usable 4:2:0 session but
+also observed short packet-loss spikes and failure to sustain the 4:4:4 selection.
+Treat those as direction for the adaptive-WAN and Windows 10-bit 4:4:4 phases, not as
+qualification of either feature.
+
+Next, exercise all three revision 39 capture choices on single- and dual-monitor
+systems, including reconnect and display changes. Then begin the capability-driven
+Windows 10-bit 4:4:4 path described in `WINDOWS.md`.
 
 ## Remaining gates
 

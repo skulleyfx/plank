@@ -27,6 +27,23 @@ changes are meant to go back to `plank-client` so every platform uses one client
   Text only is a deliberate choice: files and images are never carried.
 - **Two screens:** composites two workstation displays into one picture and arranges
   them side by side for the session, restoring the previous arrangement afterwards.
+- **Pen tablets:** forwards Windows pen identity, pressure and tilt. The tablet driver
+  must have Windows Ink enabled so the client receives pen events instead of mouse
+  events; Windows visual feedback can be disabled separately without disabling Ink.
+
+## Capture sources
+
+The Windows client shows only capture sources that the selected host advertises at
+runtime.
+
+| Choice | Use | Limits |
+| --- | --- | --- |
+| `Automatic` | Default. Tries DXGI Desktop Duplication, then WGC. | Uses the first backend that initializes successfully. |
+| `DXGI Desktop Duplication` | Lowest latency and multi-monitor/spanned sessions. | Requires a duplicable attached output. |
+| `Windows Graphics Capture` | Compatibility fallback for single-output sessions. | Does not support a spanned multi-monitor desktop. |
+
+An explicit choice never silently changes to the other backend. If the requested
+backend is unavailable, the connection fails with a clear capture-source error.
 
 ## Display layouts
 
@@ -83,9 +100,24 @@ the certificate and host ID that keep clients paired.
 
 ## What is not done yet
 
-- **Pen pressure on Windows clients.** Pen capture in the client is libinput-only, so
-  a Windows client sends pen input as mouse movement. Windows capture through the
-  SDL pen events is the next step; the host's own pen injection additionally needs a
-  virtual HID runtime that is not currently shipped.
 - **Single sign-on.** A session asks for DUO twice, once for PLANK and once for Windows.
 - **Support sessions.** Watching or assisting another user's session is designed, not built.
+
+## Roadmap
+
+1. Qualify the selectable capture backends across single- and dual-monitor Windows
+   workstations, including reconnect, mixed-resolution and display-change tests.
+2. Add and qualify a Windows 10-bit 4:4:4 path with accurate color metadata and an
+   explicit, capability-driven fallback when the GPU cannot serve the requested mode.
+3. Add adaptive WAN behavior for higher round-trip time, constrained bandwidth and
+   short packet-loss bursts without increasing local-network latency.
+4. Build collaboration sessions that require the desktop user's approval and an
+   administrator-policy mode for unattended viewing with an audit trail.
+5. Complete the macOS Host path with ScreenCaptureKit capture, hardware HEVC,
+   authentication, display lifecycle, packaging and sustained performance tests.
+6. Replace the current double PLANK/Windows authentication prompt with the qualified
+   single-sign-on design.
+
+Windows pen pressure, tilt and pen identity are implemented. Keep them in the release
+regression matrix, including a test that distinguishes real pen events from mouse
+fallback.

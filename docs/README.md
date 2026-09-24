@@ -10,6 +10,8 @@
   boundary between public development material and private operational notes.
 - [Hardware](hardware/): qualified hardware and display data.
 - [Releases](releases/): release notes.
+  [Windows 1.0.103.39](releases/1.0.103.39.md) documents the selectable Windows
+  capture-source release and its signed package checksums.
 - [Reference](reference/): retained technical reference material.
 
 Shared wire contracts live in [protocol](../protocol/). Current work belongs in
