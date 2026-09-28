@@ -191,6 +191,7 @@ Four portable root CTest entries pass, including 20 privacy guard cases.
 | Shared Client | `c032da3ae0d7e816a7a6f9bb9a51dd489d4d369c` |
 | Windows Host 1.0.103.39 | `ac6444de094ce1d7d27f90cc647995ac8bdab603` |
 | Windows Client 1.0.103.39 (`windows`) | `467c4c19b2e6fb2ca4bb4fd2b4ca252ad0ff61ad` |
+| Windows Client 1.0.103.41 (`windows`) | `485a8f7f54731cd5997fbb0798eac37b3f86cb64` |
 | Transport | `912ece5c64787997f978673ca60d313898a3548c` |
 | Host common-C | `775943b5ac5e5100a3c2b1b89d9e21151dea4f29` |
 | Client common-C | `b9650552f98d97f6e30c9f007115c6246f0809e5` |
@@ -198,7 +199,7 @@ Four portable root CTest entries pass, including 20 privacy guard cases.
 | Host build dependencies | `caf0495d5e6baff94f349853d4a59e3779a451a0` |
 | Host virtual HID | `93d57db99a5bf4b1a9fbbc7ad1371671725b7e97` |
 
-## Windows 1.0.103.39 checkpoint
+## Windows Host 1.0.103.39 and Client 1.0.103.41 checkpoint
 
 The Windows Host now advertises capture-source availability at runtime. The Windows
 Client offers Automatic, explicit DXGI Desktop Duplication and explicit Windows
@@ -220,6 +221,13 @@ qualification of either feature.
 Next, exercise all three revision 39 capture choices on single- and dual-monitor
 systems, including reconnect and display changes. Then begin the capability-driven
 Windows 10-bit 4:4:4 path described in `WINDOWS.md`.
+
+Windows Client 1.0.103.41 adds an active-codec toolbar label and repairs the
+replacement-session authorization used when switching display layouts. A focused
+Windows acceptance test switched an established 1.0.103.41 Client session from one
+remote display to two displays on a 1.0.103.39 Host. Both displays appeared and the
+previous HTTP 403 did not recur. See `docs/releases/1.0.103.41.md` for the signed
+MSI checksum, exact Client commits and the remaining display UX scope.
 
 ## Remaining gates
 
