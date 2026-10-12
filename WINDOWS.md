@@ -30,6 +30,16 @@ changes are meant to go back to `plank-client` so every platform uses one client
 - **Pen tablets:** forwards Windows pen identity, pressure and tilt. The tablet driver
   must have Windows Ink enabled so the client receives pen events instead of mouse
   events; Windows visual feedback can be disabled separately without disabling Ink.
+- **Shared screen:** a second person can watch a host someone is using, view-only by
+  default (up to 4 viewers). A viewer can ask for control and the owner allows or denies
+  it. Off by default: `shared_screen` in `host.conf`.
+- **NDI output:** publishes a workstation screen as an NDI source, for example to feed
+  Evercast. It needs the free NDI runtime (NDI Tools) installed on the host and is off by
+  default: `ndi_output` in `host.conf`.
+
+Current release: host 1.0.103.51, client 1.0.103.52. The `host.conf` options are
+documented in `docs/configuration.md` in
+[plank-host-windows](https://github.com/skulleyfx/plank-host-windows).
 
 ## Capture sources
 
