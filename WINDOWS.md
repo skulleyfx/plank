@@ -37,9 +37,28 @@ changes are meant to go back to `plank-client` so every platform uses one client
   Evercast. It needs the free NDI runtime (NDI Tools) installed on the host and is off by
   default: `ndi_output` in `host.conf`.
 
-Current release: host 1.0.103.51, client 1.0.103.52. The `host.conf` options are
+Current release: host 1.0.103.51, client 1.0.103.61. The `host.conf` options are
 documented in `docs/configuration.md` in
 [plank-host-windows](https://github.com/skulleyfx/plank-host-windows).
+
+## Windows client features
+
+- **Wacom pen:** pressure and pen contact come from the Wacom driver (WinTab), so the
+  light start and end of a stroke reach the host. WinTab opens a system context only,
+  and drives the pen only for a focused PLANK window. `PLANK_WINTAB=0` turns it off.
+- **Host pointer while drawing:** on a Linux host, Flame's Tablet Margins stretch the
+  pointer, so while the pen is in use the client shows the host's pointer instead of its
+  own. A mouse takes the local pointer back once the pen has been quiet for 300 ms.
+- **Mac hosts:** connects to Alan's Mac hosts, choosing the display and launch schema
+  from the host's version, with text clipboard both ways.
+- **Two-screen safety:** if a two-screen session never shows a picture (the host
+  refuses two screens, or the second window or decoder fails), the client turns two
+  screens off for that bookmark, so the next connection uses one screen.
+- **Virtual display size:** new bookmarks default to 2560x1440. Existing bookmarks keep
+  their saved size.
+
+The client is installed only on the machines that need it. Studio workstations and
+render nodes run the host only.
 
 ## Capture sources
 
