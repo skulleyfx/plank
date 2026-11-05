@@ -37,7 +37,7 @@ changes are meant to go back to `plank-client` so every platform uses one client
   Evercast. It needs the free NDI runtime (NDI Tools) installed on the host and is off by
   default: `ndi_output` in `host.conf`.
 
-Current release: host 1.0.103.51, client 1.0.103.61. The `host.conf` options are
+Current release: host 1.0.103.51, client 1.0.103.62. The `host.conf` options are
 documented in `docs/configuration.md` in
 [plank-host-windows](https://github.com/skulleyfx/plank-host-windows).
 
@@ -51,6 +51,10 @@ documented in `docs/configuration.md` in
   own. A mouse takes the local pointer back once the pen has been quiet for 300 ms.
 - **Mac hosts:** connects to Alan's Mac hosts, choosing the display and launch schema
   from the host's version, with text clipboard both ways.
+  Client 1.0.103.62 also connects to Mac Host 1.1 and later (which can show the Mac's
+  login window): it offers the `plank-native/2` protocol and reads that host's
+  RFC 6330 FEC repair numbering. Our own hosts still use `kymux`. The build pins
+  plank `windows-client-dual-fec` (kymux `skulleyfx/dual-fec`, 314be69).
 - **Two-screen safety:** if a two-screen session never shows a picture (the host
   refuses two screens, or the second window or decoder fails), the client turns two
   screens off for that bookmark, so the next connection uses one screen.
